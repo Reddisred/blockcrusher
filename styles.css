@@ -1,0 +1,135 @@
+
+/* Shared colors, typography, and game sizing tokens. */
+:root {
+  --bg: #000;
+  --gold: #e8c44a;
+  --gold-glow: #e8c44a55;
+  --correct: #4fc97e;
+  --wrong: #e74c3c;
+  --accent: #c8a84b;
+  --hud-text: #f0ead8;
+  --hud-dim: #555;
+  --font-hud: 'Orbitron', monospace;
+  --font-card: 'Nunito', sans-serif;
+  --game-w: 460px;
+}
+
+/* Reset browser defaults and keep hidden overlays out of layout. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html, body { height: 100%; background: var(--bg); color: var(--hud-text); font-family: var(--font-card); overflow: hidden; }
+
+body {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 12px; gap: 8px;
+}
+
+.hud {
+  width: 100%; max-width: var(--game-w);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-shrink: 0;
+}
+.hud-stat { display: flex; flex-direction: column; align-items: center; min-width: 56px; }
+.hud-label { font-size: 8px; font-family: var(--font-hud); letter-spacing: 0.14em; text-transform: uppercase; color: var(--hud-dim); }
+.hud-val { font-family: var(--font-hud); font-size: clamp(18px, 3.5vw, 26px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: var(--hud-text); }
+#score-val { color: var(--gold); }
+
+.lives-row { display: flex; gap: 4px; align-items: center; }
+.life-pip { width: 10px; height: 10px; border-radius: 50%; background: var(--wrong); transition: background 0.3s, transform 0.2s; }
+.life-pip.lost { background: #2a0a0a; transform: scale(0.7); }
+
+.arena-wrap { position: relative; width: 100%; max-width: var(--game-w); flex: 1; min-height: 0; }
+#game-canvas { width: 100%; height: 100%; display: block; border-radius: 4px; }
+
+.input-zone { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; max-width: 340px; flex-shrink: 0; }
+.input-hint { font-family: var(--font-hud); font-size: 9px; letter-spacing: 0.1em; color: var(--hud-dim); text-transform: uppercase; }
+.answer-row { display: flex; gap: 8px; width: 100%; }
+
+#answer-input {
+  flex: 1; background: #111; border: 2px solid #333; border-radius: 8px;
+  padding: 8px 14px; font-family: var(--font-hud); font-size: 22px; font-weight: 700;
+  color: var(--hud-text); text-align: center; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -moz-appearance: textfield;
+}
+#answer-input::-webkit-inner-spin-button, #answer-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+#answer-input:focus { border-color: var(--accent); }
+#answer-input.flash-ok  { border-color: var(--correct) !important; box-shadow: 0 0 12px #4fc97e55; }
+#answer-input.flash-bad { border-color: var(--wrong)   !important; box-shadow: 0 0 12px #e74c3c55; }
+
+#blast-btn {
+  background: #1a1a1a; border: 2px solid var(--accent); color: var(--accent);
+  border-radius: 8px; padding: 0 16px; font-family: var(--font-card); font-size: 14px;
+  font-weight: 900; cursor: pointer; letter-spacing: 0.06em; transition: background 0.15s, color 0.15s;
+}
+#blast-btn:hover { background: var(--accent); color: #000; }
+#blast-btn:active { transform: scale(0.95); }
+
+.overlay {
+  position: fixed; inset: 0; background: #000c;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; backdrop-filter: blur(6px);
+}
+.overlay-box {
+  background: #0d0d0d; border: 2px solid #c8b87a; border-radius: 14px;
+  padding: 28px 36px; text-align: center; max-width: 360px; width: 90%;
+}
+.ov-title { font-family: var(--font-hud); font-size: clamp(18px, 5vw, 28px); font-weight: 900; color: var(--gold); text-shadow: 0 0 16px var(--gold-glow); margin-bottom: 8px; }
+.ov-sub { color: #888; font-size: 13px; font-weight: 700; line-height: 1.6; margin-bottom: 16px; }
+.ov-score { font-family: var(--font-hud); font-size: 50px; font-weight: 900; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+.ov-stats { color: #666; font-size: 11px; font-family: var(--font-hud); letter-spacing: 0.07em; margin-bottom: 20px; line-height: 1.9; }
+.btn-main {
+  background: #111; border: 2px solid var(--accent); color: var(--accent);
+  border-radius: 10px; padding: 11px 32px; font-family: var(--font-card);
+  font-size: 16px; font-weight: 900; cursor: pointer; letter-spacing: 0.05em;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-main:hover { background: var(--accent); color: #000; }
+
+.diff-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
+.opt-btn {
+  background: #111; border: 2px solid #333; color: #777; border-radius: 7px;
+  padding: 6px 14px; font-family: var(--font-card); font-size: 12px; font-weight: 900;
+  cursor: pointer; transition: all 0.15s;
+}
+.opt-btn.on, .opt-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.mult-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 5px; margin-bottom: 12px; width: 100%;
+}
+.mult-chip {
+  background: #111; border: 2px solid #333; color: #777; border-radius: 6px;
+  padding: 5px 2px; font-family: var(--font-card); font-size: 13px; font-weight: 900;
+  cursor: pointer; transition: all 0.15s; text-align: center; user-select: none;
+}
+.mult-chip.on { border-color: var(--accent); color: var(--accent); background: #1a1200; }
+.mult-chip:hover { border-color: #888; color: #aaa; }
+.mult-chip.on:hover { border-color: var(--gold); color: var(--gold); }
+.mult-shortcuts { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; flex-wrap: wrap; }
+.shortcut-btn {
+  background: transparent; border: 1px solid #333; color: #555; border-radius: 5px;
+  padding: 3px 10px; font-family: var(--font-hud); font-size: 8px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s;
+}
+.shortcut-btn:hover { border-color: #666; color: #888; }
+.ov-label { font-family: var(--font-hud); font-size: 8px; letter-spacing: 0.14em; color: var(--hud-dim); text-transform: uppercase; margin-bottom: 7px; }
+
+.speed-btn {
+  background: #111; border: 2px solid #333; color: #777; border-radius: 8px;
+  padding: 8px 14px; font-family: var(--font-card); cursor: pointer;
+  text-align: left; transition: all 0.15s; display: flex; flex-direction: column; gap: 2px;
+}
+.speed-btn:hover { border-color: #666; color: #aaa; }
+.speed-btn.on { border-color: var(--accent); background: #1a1200; }
+.speed-name {
+  font-size: 13px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
+  color: inherit;
+}
+.speed-btn.on .speed-name { color: var(--gold); }
+.speed-desc { font-size: 10px; color: #555; font-weight: 700; }
+.speed-btn.on .speed-desc { color: #887040; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
