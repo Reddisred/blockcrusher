@@ -1,0 +1,163 @@
+<title>Block Crusher</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@700;900&display=swap">
+
+<link rel="stylesheet" href="styles.css">
+<!-- Setup flow: player details, multiplication facts, speed, lives, and bomb mode. -->
+<div class="overlay" id="start-screen">
+  <div class="overlay-box">
+    <canvas id="title-canvas" width="160" height="120" style="display:block;margin:0 auto 4px;"></canvas>
+    <div class="ov-title">BLOCK<br>CRUSHER</div>
+    <div class="ov-sub">
+      Blocks fall from above — type the product<br>to hurl the hammer and smash it!<br>
+      Wrong answer? Hammer flies off sideways. 💨
+    </div>
+          <div style="font-family:var(--font-hud);font-size:10px;color:#555;letter-spacing:0.08em;margin-bottom:10px">
+      🏗️ A <span style="color:#888">Wild Lange'N Productions</span> game &nbsp;·&nbsp;
+      <a href="https://matharcadium.com" target="_blank" style="color:#4caf50;text-decoration:none;">matharcadium.com</a>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px">
+      <span style="font-family:var(--font-hud);font-size:10px;color:var(--gold)">BANK: <span id="bank-points">0</span> PTS</span>
+      <button class="opt-btn" id="upgrade-open">UPGRADES</button>
+    </div>
+    <!-- Card 0: player identity -->
+    <div id="setup-card-0">
+      <div class="ov-label" style="margin-bottom:8px">Your name</div>
+      <input type="text" id="player-name" placeholder="First name + last initial (e.g. Casey L.)"
+        style="width:100%;background:#111;border:2px solid #333;border-radius:8px;padding:8px 12px;
+        font-family:var(--font-card);font-size:14px;font-weight:700;color:var(--hud-text);
+        outline:none;margin-bottom:12px;box-sizing:border-box;">
+      <div class="ov-label" style="margin-bottom:8px">Student ID</div>
+      <input type="text" inputmode="numeric" id="student-id" placeholder="Your student ID number"
+        style="width:100%;background:#111;border:2px solid #333;border-radius:8px;padding:8px 12px;
+        font-family:var(--font-card);font-size:14px;font-weight:700;color:var(--hud-text);
+        outline:none;margin-bottom:12px;box-sizing:border-box;">
+      <div class="ov-label" style="margin-bottom:8px">Your grade</div>
+      <div class="diff-row" id="grade-row" style="flex-wrap:wrap;margin-bottom:12px">
+        <button class="opt-btn on" data-grade="6">6th</button>
+        <button class="opt-btn" data-grade="7">7th</button>
+        <button class="opt-btn" data-grade="8">8th</button>
+      </div>
+      <div class="ov-label" style="margin-bottom:8px">Your period</div>
+      <div class="diff-row" id="period-row" style="flex-wrap:wrap;margin-bottom:14px">
+        <button class="opt-btn on" data-period="1">1</button>
+        <button class="opt-btn" data-period="2">2</button>
+        <button class="opt-btn" data-period="3">3</button>
+        <button class="opt-btn" data-period="4">4</button>
+        <button class="opt-btn" data-period="5">5</button>
+        <button class="opt-btn" data-period="6">6</button>
+        <button class="opt-btn" data-period="7">7</button>
+        <button class="opt-btn" data-period="8">8</button>
+      </div>
+      <div id="name-error" style="color:#e74c3c;font-size:11px;font-family:var(--font-hud);margin-bottom:6px;display:none">Please enter your name and student ID!</div>
+      <button class="btn-main" id="next-btn-0" style="width:100%">NEXT →</button>
+    </div>
+    <!-- Card 1: multiples -->
+    <div id="setup-card-1" hidden>
+      <div style="font-family:var(--font-hud);font-size:11px;letter-spacing:0.1em;color:var(--gold);text-align:center;margin-bottom:7px;text-transform:uppercase;">Choose your multiple or multiples below</div>
+      <div class="mult-grid" id="mult-grid"></div>
+      <button class="btn-main" id="next-btn" style="margin-top:8px;width:100%">NEXT →</button>
+    </div>
+
+    <!-- Card 2: speed + lives -->
+    <div id="setup-card-2" hidden>
+      <div class="ov-label" style="margin-bottom:10px">Choose your speed</div>
+      <div class="diff-row" style="flex-direction:column;gap:7px;align-items:stretch;margin-bottom:14px">
+        <button class="speed-btn on" data-pace="5786" data-rank="0">
+          <span class="speed-name">APPRENTICE &nbsp;<span style="font-size:10px;color:#666;font-weight:600">1× pts</span></span>
+          <span class="speed-desc">Slowest — plenty of time to think</span>
+        </button>
+        <button class="speed-btn" data-pace="2624" data-rank="1">
+          <span class="speed-name">SOLID WORKER &nbsp;<span style="font-size:10px;color:#666;font-weight:600">1.5× pts</span></span>
+          <span class="speed-desc">Comfortable pace for most students</span>
+        </button>
+        <button class="speed-btn" data-pace="2282" data-rank="2">
+          <span class="speed-name">PROFESSIONAL &nbsp;<span style="font-size:10px;color:#666;font-weight:600">2× pts</span></span>
+          <span class="speed-desc">Fast — sharp recall needed</span>
+        </button>
+        <button class="speed-btn" data-pace="1588" data-rank="3">
+          <span class="speed-name">GAUDÍ 🏛️ &nbsp;<span style="font-size:10px;color:#f0a000;font-weight:700">3× pts</span></span>
+          <span class="speed-desc">Chaotic genius pace — are you serious?</span>
+        </button>
+      </div>
+      <div class="ov-label">LIVES</div>
+      <div class="diff-row" style="margin-bottom:10px">
+        <button class="opt-btn" data-lives="3">3</button>
+        <button class="opt-btn on" data-lives="5">5</button>
+      </div>
+      <div style="margin-top:16px;margin-bottom:10px;border-radius:12px;overflow:hidden;border:3px solid #555">
+        <div style="background:#222;padding:8px 0 6px;text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;color:#aaa">BOMB MODE</div>
+        <div style="display:flex">
+          <button id="bombs-on" style="flex:1;padding:16px 8px;border:none;cursor:pointer;font-size:15px;font-weight:800;letter-spacing:1px;background:#1a1a1a;color:#666;transition:all .15s;border-right:2px solid #333">
+            💣 BOMBS<br><span style="font-size:10px;font-weight:500;letter-spacing:0">+500 pts per dodge</span>
+          </button>
+          <button id="bombs-off" style="flex:1;padding:16px 8px;border:none;cursor:pointer;font-size:15px;font-weight:800;letter-spacing:1px;background:#2a6a2a;color:#7fff7f;transition:all .15s">
+            🚫 NO BOMBS<br><span style="font-size:10px;font-weight:500;letter-spacing:0">Safe mode</span>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-main" id="back-btn" style="background:transparent;border-color:#444;color:#666;flex:0 0 auto;padding:11px 16px">← BACK</button>
+        <button class="btn-main" id="start-btn" style="flex:1">START CRUSHING</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upgrade shop and end-of-game results overlays. -->
+<div class="overlay" id="upgrade-screen" hidden>
+  <div class="overlay-box">
+    <div class="ov-title">UPGRADES</div>
+    <div class="ov-sub">Spend points earned in previous games. Upgrades are permanent.</div>
+    <div id="upgrade-balance" style="font-family:var(--font-hud);color:var(--gold);font-size:13px;margin-bottom:14px">0 PTS</div>
+    <div id="upgrade-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px"></div>
+    <button class="btn-main" id="upgrade-close">BACK TO MENU</button>
+  </div>
+</div>
+
+<div class="overlay" id="end-screen" hidden>
+  <div class="overlay-box">
+    <div class="ov-title" id="end-title">GAME OVER</div>
+    <div class="ov-score" id="end-score">0</div>
+    <div class="ov-stats" id="end-stats"></div>
+    <div class="ov-sub" id="end-msg"></div>
+    <button class="btn-main" id="restart-btn">PLAY AGAIN</button>
+  </div>
+</div>
+
+<!-- In-game status display, playfield, and answer controls. -->
+<div class="hud">
+  <div class="hud-stat">
+    <span class="hud-label">SCORE</span>
+    <span class="hud-val" id="score-val">0</span>
+  </div>
+  <div class="hud-stat">
+    <span class="hud-label">SMASHED</span>
+    <span class="hud-val" id="smash-val">0</span>
+  </div>
+  <div class="hud-stat">
+    <span class="hud-label">STREAK</span>
+    <span class="hud-val" id="streak-val">×1</span>
+  </div>
+  <div class="hud-stat">
+    <span class="hud-label">LIVES</span>
+    <div class="lives-row" id="lives-row"></div>
+  </div>
+  <button id="menu-btn" title="Main Menu" style="background:transparent;border:1px solid #333;border-radius:6px;color:#555;font-size:11px;font-family:var(--font-hud);font-weight:700;letter-spacing:0.05em;padding:4px 8px;cursor:pointer;align-self:center;transition:all .15s" onmouseover="this.style.borderColor='#666';this.style.color='#aaa'" onmouseout="this.style.borderColor='#333';this.style.color='#555'">☰ MENU</button>
+</div>
+
+<div class="arena-wrap">
+  <canvas id="game-canvas"></canvas>
+</div>
+
+<div class="input-zone">
+  <div class="input-hint">Type the product → throw the hammer</div>
+  <div class="answer-row">
+    <input type="text" inputmode="numeric" id="answer-input" placeholder="?" autocomplete="off">
+    <button id="blast-btn">THROW</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
