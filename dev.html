@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Developer Panel · Block Crusher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@700;900&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh; margin: 0; padding: 24px; display: grid; place-items: center;
+      background: #000; color: #f0ead8; font-family: 'Nunito', sans-serif;
+    }
+    main { width: min(100%, 420px); padding: 28px; background: #0d0d0d; border: 2px solid #c8b87a; border-radius: 14px; }
+    h1 { margin: 0 0 8px; color: #e8c44a; font: 900 22px 'Orbitron', monospace; text-align: center; }
+    p { color: #888; font-size: 13px; line-height: 1.5; text-align: center; }
+    .balance { margin: 22px 0; color: #e8c44a; font: 700 16px 'Orbitron', monospace; text-align: center; }
+    label { display: block; margin: 14px 0 6px; color: #aaa; font-size: 12px; }
+    input { width: 100%; padding: 10px; border: 2px solid #333; border-radius: 7px; background: #111; color: #f0ead8; font: 700 16px 'Nunito', sans-serif; }
+    .actions { display: flex; gap: 10px; margin-top: 10px; }
+    button, a { flex: 1; padding: 10px; border: 2px solid #c8a84b; border-radius: 8px; background: #111; color: #c8a84b; font: 900 13px 'Nunito', sans-serif; text-align: center; text-decoration: none; cursor: pointer; }
+    button:hover, a:hover { background: #c8a84b; color: #000; }
+    .status { margin: 8px 0 14px; color: #aaa; font-size: 13px; }
+    #message { min-height: 20px; color: #4fc97e; font-size: 12px; text-align: center; }
+    .warning { margin-top: 20px; padding-top: 12px; border-top: 1px solid #333; color: #777; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>DEVELOPER PANEL</h1>
+    <p>Manage locally saved Block Crusher progress on this browser.</p>
+
+    <div class="balance">BANK: <span id="points">0</span> PTS</div>
+    <label for="amount">Points to adjust</label>
+    <input id="amount" type="number" min="1" step="1" value="1000">
+    <div class="actions">
+      <button id="add-points" type="button">ADD POINTS</button>
+      <button id="remove-points" type="button">REMOVE POINTS</button>
+    </div>
+
+    <label>Secret 0× mode</label>
+    <div class="status">Status: <strong id="secret-status">Locked</strong></div>
+    <div class="actions">
+      <button id="enable-secret" type="button">ENABLE</button>
+      <button id="disable-secret" type="button">DISABLE</button>
+    </div>
+
+    <p id="message" role="status" aria-live="polite"></p>
+    <div class="actions"><a href="index.html">BACK TO GAME</a></div>
+    <div class="warning">This page has no authentication. Anyone who can open this page in the same browser can edit its local game progress.</div>
+  </main>
+
+  <script>
+    const SAVE_KEY = 'blockCrusherProgressV2';
+    const pointsEl = document.getElementById('points');
+    const secretStatusEl = document.getElementById('secret-status');
+    const messageEl = document.getElementById('message');
+
+    function readProgress() {
+      try {
+        const progress = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+        return progress && typeof progress === 'object' ? progress : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function refresh() {
+      const progress = readProgress();
+      pointsEl.textContent = Math.max(0, Number(progress.points) || 0);
+      secretStatusEl.textContent = progress.zeroUnlocked === true ? 'Enabled' : 'Disabled';
+      secretStatusEl.style.color = progress.zeroUnlocked === true ? '#4fc97e' : '#e74c3c';
+    }
+
+    function updateProgress(change, successMessage) {
+      const progress = readProgress();
+      const current = Math.max(0, Number(progress.points) || 0);
+      progress.points = Math.max(0, change(current));
+      localStorage.setItem(SAVE_KEY, JSON.stringify(progress));
+      refresh();
+      messageEl.textContent = successMessage;
+    }
+
+    function getAmount() {
+      const amount = Number(document.getElementById('amount').value);
+      if (!Number.isSafeInteger(amount) || amount < 1) {
+        messageEl.textContent = 'Enter a whole number greater than zero.';
+        return null;
+      }
+      return amount;
+    }
+
+    document.getElementById('add-points').addEventListener('click', () => {
+      const amount = getAmount();
+      if (amount !== null) updateProgress(points => points + amount, `${amount} points added.`);
+    });
+
+    document.getElementById('remove-points').addEventListener('click', () => {
+      const amount = getAmount();
+      if (amount !== null) updateProgress(points => points - amount, `${amount} points removed (balance cannot go below zero).`);
+    });
+
+    document.getElementById('enable-secret').addEventListener('click', () => {
+      const progress = readProgress();
+      progress.zeroUnlocked = true;
+      localStorage.setItem(SAVE_KEY, JSON.stringify(progress));
+      refresh();
+      messageEl.textContent = 'Secret 0× mode enabled.';
+    });
+
+    document.getElementById('disable-secret').addEventListener('click', () => {
+      const progress = readProgress();
+      progress.zeroUnlocked = false;
+      localStorage.setItem(SAVE_KEY, JSON.stringify(progress));
+      refresh();
+      messageEl.textContent = 'Secret 0× mode disabled.';
+    });
+
+    refresh();
+  </script>
+</body>
+</html>
